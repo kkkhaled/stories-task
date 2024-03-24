@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the User model
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // Define the relationship between User and Story
+  stories   Story[]
+  // Define the relationship between User and Review
+  reviews   Review[]
+}
+
+// Define the Story model
+model Story {
+  id          Int      @id @default(autoincrement())
+  title       String
+  body        String
+  author      User     @relation(fields: [authorId], references: [id])
+  authorId    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // Define the relationship between Story and Review
+  reviews     Review[]
+}
+
+// Define the Review model
+model Review {
+  id          Int      @id @default(autoincrement())
+  rating      Int      // Rating out of 5
+  comment     String   // Mandatory comment
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  story       Story    @relation(fields: [storyId], references: [id])
+  storyId     Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, storyId]) // Ensure each user can review a story only once
+}
